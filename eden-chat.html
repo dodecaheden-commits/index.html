@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Eden Spin Realm – Local Chat</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: radial-gradient(circle at top, #3b82f6 0, #020617 40%, #000 100%);
+      color: #e5e7eb;
+      height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+    .shell {
+      margin: auto;
+      width: 100%;
+      max-width: 960px;
+      height: 90vh;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .sidebar {
+      width: 260px;
+      border-right: 1px solid rgba(51, 65, 85, 0.9);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, #020617 0, #020617 40%, #0b1120 100%);
+    }
+    .logo {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .logo span {
+      color: #38bdf8;
+    }
+    .tagline {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-bottom: 16px;
+    }
+    .auth-box {
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+    }
+    label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+      display: block;
+      margin-top: 8px;
+      margin-bottom: 2px;
+    }
+    input {
+      width: 100%;
+      padding: 7px 9px;
+      border-radius: 8px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+    }
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    button {
+      flex: 1;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #38bdf8, #6366f1);
+      color: #020617;
+    }
+    .btn-ghost {
+      background: transparent;
+      color: #e5e7eb;
+      border: 1px solid #4b5563;
+    }
+    .error {
+      color: #f97373;
+      font-size: 0.75rem;
+      margin-top: 6px;
+      min-height: 1em;
+    }
+    .user-label {
+      margin-top: 14px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+    .user-label span {
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.12), transparent 55%);
+    }
+    .main-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .room-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #9ca3af;
+    }
+    .room-title span {
+      color: #e5e7eb;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      margin-right: 6px;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 12px 16px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+    }
+    .msg {
+      margin-bottom: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(31, 41, 55, 0.9);
+    }
+    .msg-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      margin-bottom: 2px;
+    }
+    .msg-user {
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+    .msg-time {
+      color: #9ca3af;
+    }
+    .msg-body {
+      color: #d1d5db;
+      word-wrap: break-word;
+    }
+
+    .input-bar {
+      padding: 10px 16px 14px;
+      border-top: 1px solid rgba(51, 65, 85, 0.9);
+      display: flex;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.96);
+    }
+    .input-bar input {
+      flex: 1;
+    }
+    .input-bar button {
+      flex: 0 0 auto;
+      padding-inline: 16px;
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        flex-direction: column;
+        height: 100vh;
+        border-radius: 0;
+      }
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(51, 65, 85, 0.9);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="sidebar">
+      <div class="logo">Eden <span>Spin</span> Realm</div>
+      <div class="tagline">Local chat portal. Email in, messages saved here.</div>
+
+      <div class="auth-box" id="auth-box">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@example.com" />
+
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="make one up" />
+
+        <div class="btn-row">
+          <button class="btn-primary" id="signup">Sign up</button>
+          <button class="btn-ghost" id="login">Log in</button>
+        </div>
+
+        <div class="error" id="auth-error"></div>
+      </div>
+
+      <div class="user-label" id="user-label" style="display:none;">
+        Logged in as <span id="user-email"></span>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="main-header">
+        <div class="room-title">Channel · <span>#global-lobby</span></div>
+        <div class="status">
+          <div class="status-dot"></div>
+          Local realm (this device)
+        </div>
+      </div>
+
+      <div class="messages" id="messages"></div>
+
+      <div class="input-bar">
+        <input id="message-input" placeholder="Cast a message into the realm..." />
+        <button class="btn-primary" id="send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // "Database" in localStorage
+    const USERS_KEY = 'eden_users';
+    const MESSAGES_KEY = 'eden_messages';
+    const CURRENT_USER_KEY = 'eden_current_user';
+
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const signupBtn = document.getElementById('signup');
+    const loginBtn = document.getElementById('login');
+    const authError = document.getElementById('auth-error');
+    const userLabelWrap = document.getElementById('user-label');
+    const userEmailSpan = document.getElementById('user-email');
+
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send');
+
+    let currentUser = null;
+
+    function loadUsers() {
+      return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+    }
+    function saveUsers(users) {
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    }
+
+    function loadMessages() {
+      return JSON.parse(localStorage.getItem(MESSAGES_KEY) || '[]');
+    }
+    function saveMessages(msgs) {
+      localStorage.setItem(MESSAGES_KEY, JSON.stringify(msgs));
+    }
+
+    function setError(msg) {
+      authError.textContent = msg || '';
+    }
+
+    function setLoggedIn(user) {
+      currentUser = user;
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+      userEmailSpan.textContent = user.email;
+      userLabelWrap.style.display = 'block';
+    }
+
+    function addMessageToUI(msg) {
+      const wrap = document.createElement('div');
+      wrap.className = 'msg';
+
+      const header = document.createElement('div');
+      header.className = 'msg-header';
+
+      const user = document.createElement('div');
+      user.className = 'msg-user';
+      user.textContent = msg.email;
+
+      const time = document.createElement('div');
+      time.className = 'msg-time';
+      time.textContent = new Date(msg.createdAt).toLocaleTimeString();
+
+      header.appendChild(user);
+      header.appendChild(time);
+
+      const body = document.createElement('div');
+      body.className = 'msg-body';
+      body.textContent = msg.text;
+
+      wrap.appendChild(header);
+      wrap.appendChild(body);
+
+      messagesDiv.appendChild(wrap);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function renderMessages() {
+      messagesDiv.innerHTML = '';
+      const msgs = loadMessages();
+      msgs.forEach(addMessageToUI);
+    }
+
+    function handleSignup() {
+      setError('');
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      if (!email || !password) {
+        setError('Email and password required.');
+        return;
+      }
+      const users = loadUsers();
+      if (users.find(u => u.email === email)) {
+        setError('That email is already registered.');
+        return;
+      }
+      const user = { email, password };
+      users.push(user);
+      saveUsers(users);
+      setLoggedIn(user);
+    }
+
+    function handleLogin() {
+      setError('');
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      if (!email || !password) {
+        setError('Email and password required.');
+        return;
+      }
+      const users = loadUsers();
+      const user = users.find(u => u.email === email && u.password === password);
+      if (!user) {
+        setError('No account found with that email/password.');
+        return;
+      }
+      setLoggedIn(user);
+    }
+
+    function handleSend() {
+      if (!currentUser) {
+        setError('Log in first to send messages.');
+        return;
+      }
+      const text = messageInput.value.trim();
+      if (!text) return;
+      const msgs = loadMessages();
+      const msg = {
+        email: currentUser.email,
+        text,
+        createdAt: Date.now()
+      };
+      msgs.push(msg);
+      saveMessages(msgs);
+      addMessageToUI(msg);
+      messageInput.value = '';
+    }
+
+    signupBtn.addEventListener('click', handleSignup);
+    loginBtn.addEventListener('click', handleLogin);
+    sendBtn.addEventListener('click', handleSend);
+    messageInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleSend();
+    });
+
+    // On load: restore user + messages
+    window.addEventListener('load', () => {
+      renderMessages();
+      const savedUser = localStorage.getItem(CURRENT_USER_KEY);
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          if (user && user.email) {
+            setLoggedIn(user);
+          }
+        } catch {}
+      }
+    });
+  </script>
+</body>
+</html>
